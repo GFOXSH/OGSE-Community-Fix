@@ -1,0 +1,53 @@
+function grub_money(npc)
+	if npc ~= nil then
+		local money = npc:money()
+		if money ~= nil and money ~=0 then
+			local deadmoney = money
+			give_money(rank,money,deadmoney,npc)	 
+		end
+	end
+end
+
+function give_money(type,money,deadmoney,npc)
+	local npc_rank
+	npc_rank = ranks.get_obj_rank_name(npc)
+	local novice_money = 200
+	local stalker_money = 250
+	local veteran_money = 300
+	local master_money = 350
+	if npc_rank ~= nil then
+		if deadmoney > 100 and deadmoney <= 1000 then
+			deadmoney = math.random(100, deadmoney)
+		elseif deadmoney > 1000 then
+			deadmoney = math.random(100, 1000)
+		else
+			local poor_man = npc:character_community() == "zombied"
+			if npc_rank == "novice" and deadmoney >= 400 then
+				if poor_man then
+					novice_money = 100
+				end
+				deadmoney = math.random(25, novice_money)	
+			elseif npc_rank == "experienced" and deadmoney >= 500 then
+				if poor_man then
+					stalker_money = 125
+				end
+				deadmoney = math.random(50, stalker_money)  
+			elseif npc_rank == "veteran" and deadmoney >= 600 then
+				if poor_man then
+					veteran_money = 150
+				end
+				deadmoney = math.random(100, veteran_money) 
+			elseif npc_rank == "master" and deadmoney >= 700 then
+				if poor_man then
+					master_money = 200
+				end
+				deadmoney = math.random(175, master_money)  
+			end
+		end
+		db.actor:give_money(deadmoney)
+		-- game_stats.money_quest_update(deadmoney) 
+		npc:give_money(-deadmoney)
+		-- game_stats.money_quest_update(-deadmoney)
+		db.actor:give_game_news("Найдены деньги: "..game.translate_string(deadmoney.." ".."руб."), "ui\\ui_iconsTotal", Frect():set(0,0,83,47), 0, 3000)
+	end
+end
